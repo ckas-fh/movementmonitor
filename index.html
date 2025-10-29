@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movement Performance Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #161618;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-dim: #6b7280;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+            scroll-behavior: smooth;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Icons */
+        .icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .icon-sm {
+            width: 16px;
+            height: 16px;
+        }
+
+        .icon-lg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            background: var(--bg-primary);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: #3b82f6;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-pills {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-card);
+            padding: 4px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+        }
+
+        .nav-pill {
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            background: none;
+            text-decoration: none;
+        }
+
+        .nav-pill.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .nav-pill:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-export {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-export:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .user-avatars {
+            display: flex;
+            margin-left: 12px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+            margin-left: -8px;
+            background: #6366f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Activity Header Card */
+        .activity-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .activity-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: #f59e0b;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .activity-name {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .activity-meta {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 24px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .activity-stats {
+            display: flex;
+            gap: 40px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+
+        .stat-unit {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-left: 8px;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-yellow {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-yellow);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-red {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Movement Chart */
+        .movement-chart {
+            height: 200px;
+            position: relative;
+            margin-bottom: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            height: 100%;
+            gap: 2px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+            transform: scaleY(1.05);
+        }
+
+        .bar-good {
+            background: var(--accent-green);
+        }
+
+        .bar-moderate {
+            background: var(--accent-yellow);
+        }
+
+        .bar-poor {
+            background: var(--accent-red);
+        }
+
+        .freeze-marker {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 3px,
+                rgba(239, 68, 68, 0.3) 3px,
+                rgba(239, 68, 68, 0.3) 6px
+            );
+            pointer-events: none;
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 16px;
+            color: var(--text-dim);
+            font-size: 12px;
+        }
+
+        /* 3D Terrain Visualization - Peak in center */
+        .terrain-container {
+            position: relative;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .terrain-3d {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(60deg) rotateZ(0deg);
+            animation: rotate 30s infinite linear;
+        }
+
+        @keyframes rotate {
+            from { transform: rotateX(60deg) rotateZ(0deg); }
+            to { transform: rotateX(60deg) rotateZ(360deg); }
+        }
+
+        /* Topographic rings - peak in center */
+        .terrain-layer {
+            position: absolute;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform-origin: center;
+        }
+
+        .terrain-layer:nth-child(1) { 
+            width: 280px;
+            height: 280px;
+            transform: translate(-50%, -50%) translateZ(10px);
+            border-color: rgba(59, 130, 246, 0.15);
+        }
+        .terrain-layer:nth-child(2) { 
+            width: 220px;
+            height: 220px;
+            transform: translate(-50%, -50%) translateZ(25px);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        .terrain-layer:nth-child(3) { 
+            width: 160px;
+            height: 160px;
+            transform: translate(-50%, -50%) translateZ(40px);
+            border-color: rgba(59, 130, 246, 0.25);
+        }
+        .terrain-layer:nth-child(4) { 
+            width: 100px;
+            height: 100px;
+            transform: translate(-50%, -50%) translateZ(55px);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        .terrain-layer:nth-child(5) { 
+            width: 40px;
+            height: 40px;
+            transform: translate(-50%, -50%) translateZ(70px);
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent);
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        /* Route line */
+        .route-line {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform: translateZ(75px);
+        }
+
+        .route-path {
+            stroke: rgba(255, 255, 255, 0.4);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 5, 5;
+            animation: dash 20s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -100;
+            }
+        }
+
+        /* Route points with better labels */
+        .route-point {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            transform: translateZ(80px);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid rgba(0, 0, 0, 0.5);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        .route-point:hover {
+            transform: translateZ(90px) scale(1.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .point-start {
+            background: var(--accent-green);
+            bottom: 10%;
+            left: 15%;
+        }
+
+        .point-technical {
+            background: var(--accent-yellow);
+            bottom: 35%;
+            right: 20%;
+        }
+
+        .point-incident {
+            background: var(--accent-red);
+            top: 30%;
+            right: 35%;
+        }
+
+        .point-summit {
+            background: var(--accent-blue);
+            top: 42%;
+            left: 47%;
+        }
+
+        /* Movement Events */
+        .event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .event-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(4px);
+        }
+
+        .event-time {
+            font-size: 14px;
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+
+        .event-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-freeze {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+        }
+
+        .icon-rest {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-yellow);
+        }
+
+        .icon-good {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+        }
+
+        .event-description {
+            flex: 1;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .event-location {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value-wrapper {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .metric-unit {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .metric-change {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+
+        .change-positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+        }
+
+        .change-negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+        }
+
+        /* Risk Assessment */
+        .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .risk-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border-left: 3px solid transparent;
+        }
+
+        .risk-high {
+            border-left-color: var(--accent-red);
+        }
+
+        .risk-medium {
+            border-left-color: var(--accent-yellow);
+        }
+
+        .risk-low {
+            border-left-color: var(--accent-green);
+        }
+
+        .risk-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .risk-value {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Enhanced Tooltip */
+        .tooltip {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.95);
+            color: var(--text-primary);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            min-width: 180px;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        .tooltip-time {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .tooltip-quality {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .quality-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .tooltip-score {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .tooltip-event {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            color: var(--accent-yellow);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Waypoint legend */
+        .waypoint-legend {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .legend-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* Section markers for navigation */
+        section {
+            scroll-margin-top: 100px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .activity-stats {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .metrics-grid,
+            .risk-grid,
+            .waypoint-legend {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">M</div>
+                <div class="logo-text">monitor</div>
+            </div>
+            <nav class="nav-pills">
+                <a href="#overview" class="nav-pill active">Overview</a>
+                <a href="#performance" class="nav-pill">Performance</a>
+                <a href="#terrain" class="nav-pill">Terrain</a>
+                <a href="#events" class="nav-pill">Events</a>
+            </nav>
+            <div class="user-section">
+                <button class="btn-export" onclick="exportReport()">Export Report</button>
+                <div class="user-avatars">
+                    <div class="avatar">RM</div>
+                    <div class="avatar" style="background: #f59e0b;">JD</div>
+                    <div class="avatar" style="background: #10b981;">+2</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Activity Header -->
+        <section id="overview">
+            <div class="activity-header">
+                <div class="activity-title">
+                    <div class="activity-icon">
+                        <svg class="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                    </div>
+                    <h1 class="activity-name">Morning Trail - Eagle's Loop</h1>
+                </div>
+                <div class="activity-meta">
+                    <span class="meta-item">
+                        <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Boulder, Colorado
+                    </span>
+                    <span class="meta-item">
+                        <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Today, Oct 27
+                    </span>
+                    <span class="meta-item">
+                        <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        6:45 AM - 10:20 AM
+                    </span>
+                </div>
+                <div class="activity-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">4.2</span>
+                        <span class="stat-unit">mi</span>
+                        <span class="stat-label">distance</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">1,240</span>
+                        <span class="stat-unit">ft</span>
+                        <span class="stat-label">elevation</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">78</span>
+                        <span class="stat-unit">/ 100</span>
+                        <span class="stat-label">movement score</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Grid -->
+        <section id="performance">
+            <div class="dashboard-grid">
+                <!-- Movement Quality Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Movement Quality</h2>
+                            <p class="card-subtitle">Hourly breakdown</p>
+                        </div>
+                        <span class="badge badge-yellow">2 Events</span>
+                    </div>
+                    <div class="movement-chart">
+                        <div class="chart-bars" id="movementBars">
+                            <!-- Bars will be generated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="chart-labels">
+                        <span>7 AM</span>
+                        <span>8 AM</span>
+                        <span>9 AM</span>
+                        <span>10 AM</span>
+                    </div>
+                </div>
+
+                <!-- Route Visualization Card -->
+                <div class="card" id="terrain">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Trail Progress</h2>
+                            <p class="card-subtitle">3D elevation map</p>
+                        </div>
+                    </div>
+                    <div class="terrain-container">
+                        <div class="terrain-3d">
+                            <!-- Topographic rings - peak in center -->
+                            <div class="terrain-layer"></div>
+                            <div class="terrain-layer"></div>
+                            <div class="terrain-layer"></div>
+                            <div class="terrain-layer"></div>
+                            <div class="terrain-layer"></div>
+                            
+                            <!-- Route line connecting waypoints -->
+                            <svg class="route-line" viewBox="0 0 300 300">
+                                <path class="route-path" d="M 45 255 L 225 210 L 195 105 L 144 135"/>
+                            </svg>
+                            
+                            <!-- Route waypoints -->
+                            <div class="route-point point-start">START</div>
+                            <div class="route-point point-technical">TECH</div>
+                            <div class="route-point point-incident">EVENT</div>
+                            <div class="route-point point-summit">PEAK</div>
+                        </div>
+                    </div>
+                    <!-- Waypoint Legend -->
+                    <div class="waypoint-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #10b981;">START</div>
+                            <span>Trailhead - 6:45 AM</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #f59e0b;">TECH</div>
+                            <span>Technical Terrain - 8:15 AM</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #ef4444;">EVENT</div>
+                            <span>Movement Issue - 9:45 AM</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #3b82f6;">PEAK</div>
+                            <span>Summit Reached - 10:00 AM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Performance Metrics</h2>
+                            <p class="card-subtitle">Real-time analysis</p>
+                        </div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">Stride Consistency</span>
+                            <div class="metric-value-wrapper">
+                                <span class="metric-value">82</span>
+                                <span class="metric-unit">%</span>
+                                <span class="metric-change change-positive">+5%</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Balance Score</span>
+                            <div class="metric-value-wrapper">
+                                <span class="metric-value">74</span>
+                                <span class="metric-unit">/ 100</span>
+                                <span class="metric-change change-negative">-3</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Cadence</span>
+                            <div class="metric-value-wrapper">
+                                <span class="metric-value">165</span>
+                                <span class="metric-unit">spm</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Active Time</span>
+                            <div class="metric-value-wrapper">
+                                <span class="metric-value">3.5</span>
+                                <span class="metric-unit">hrs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terrain Risk Assessment -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Terrain Adaptation</h2>
+                            <p class="card-subtitle">Surface-specific performance</p>
+                        </div>
+                        <span class="badge badge-yellow">Moderate</span>
+                    </div>
+                    <div class="risk-grid">
+                        <div class="risk-item risk-high">
+                            <span class="risk-label">Rocky sections</span>
+                            <span class="risk-value">Challenging</span>
+                        </div>
+                        <div class="risk-item risk-medium">
+                            <span class="risk-label">Steep inclines</span>
+                            <span class="risk-value">Moderate</span>
+                        </div>
+                        <div class="risk-item risk-low">
+                            <span class="risk-label">Flat trails</span>
+                            <span class="risk-value">Excellent</span>
+                        </div>
+                        <div class="risk-item risk-low">
+                            <span class="risk-label">Switchbacks</span>
+                            <span class="risk-value">Good</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Movement Events -->
+        <section id="events">
+            <div class="card" style="margin-bottom: 32px;">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Trail Events</h2>
+                        <p class="card-subtitle">Significant moments during your hike</p>
+                    </div>
+                </div>
+                <div class="event-list">
+                    <div class="event-item">
+                        <span class="event-time">9:45 AM</span>
+                        <div class="event-icon icon-freeze">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="event-description">Movement interruption detected - 22 seconds</div>
+                            <div class="event-location">Mile 2.8 • Rocky outcrop section</div>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <span class="event-time">8:30 AM</span>
+                        <div class="event-icon icon-rest">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="event-description">Rest break - Well managed recovery</div>
+                            <div class="event-location">Mile 1.5 • Scenic overlook</div>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <span class="event-time">8:15 AM</span>
+                        <div class="event-icon icon-freeze">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="event-description">Gait hesitation on technical terrain - 18 seconds</div>
+                            <div class="event-location">Mile 1.2 • Stream crossing</div>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <span class="event-time">7:00 AM</span>
+                        <div class="event-icon icon-good">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="event-description">Strong start - Excellent warm-up routine</div>
+                            <div class="event-location">Trailhead • Parking area</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Generate movement quality data
+        function generateMovementBars() {
+            const container = document.getElementById('movementBars');
+            const hours = 4; // 7 AM to 10 AM
+            const data = [
+                { quality: 85, freeze: false }, // 7 AM - good start
+                { quality: 72, freeze: true },  // 8 AM - stream crossing issue
+                { quality: 68, freeze: true },  // 9 AM - rocky section
+                { quality: 75, freeze: false }  // 10 AM - recovery
+            ];
+
+            container.innerHTML = '';
+            
+            data.forEach((hour, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${hour.quality}%`;
+                
+                if (hour.quality >= 75) {
+                    bar.classList.add('bar-good');
+                } else if (hour.quality >= 60) {
+                    bar.classList.add('bar-moderate');
+                } else {
+                    bar.classList.add('bar-poor');
+                }
+
+                if (hour.freeze) {
+                    const freezeMarker = document.createElement('div');
+                    freezeMarker.className = 'freeze-marker';
+                    bar.appendChild(freezeMarker);
+                }
+
+                bar.addEventListener('mouseenter', (e) => {
+                    showEnhancedTooltip(e, hour, index);
+                });
+                
+                bar.addEventListener('mouseleave', hideTooltip);
+                
+                container.appendChild(bar);
+            });
+        }
+
+        function showEnhancedTooltip(event, data, index) {
+            const tooltip = document.getElementById('tooltip');
+            const hour = 7 + index;
+            
+            let qualityText, qualityColor;
+            if (data.quality >= 75) {
+                qualityText = 'Excellent';
+                qualityColor = '#10b981';
+            } else if (data.quality >= 60) {
+                qualityText = 'Good';
+                qualityColor = '#f59e0b';
+            } else {
+                qualityText = 'Needs Attention';
+                qualityColor = '#ef4444';
+            }
+            
+            tooltip.innerHTML = `
+                <div class="tooltip-time">${hour}:00 AM</div>
+                <div class="tooltip-quality">
+                    <div class="quality-indicator" style="background: ${qualityColor}"></div>
+                    <span>${qualityText}</span>
+                </div>
+                <div class="tooltip-score">Movement Score: ${data.quality}/100</div>
+                ${data.freeze ? '<div class="tooltip-event">⚠️ Movement Event Detected</div>' : ''}
+            `;
+            
+            const rect = event.target.getBoundingClientRect();
+            tooltip.style.left = rect.left + (rect.width / 2) - 90 + 'px';
+            tooltip.style.top = rect.top - 100 + 'px';
+            tooltip.classList.add('show');
+        }
+
+        function hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.classList.remove('show');
+        }
+
+        function exportReport() {
+            // Simulate export
+            const btn = document.querySelector('.btn-export');
+            btn.textContent = 'Exporting...';
+            
+            setTimeout(() => {
+                btn.textContent = '✓ Exported';
+                setTimeout(() => {
+                    btn.textContent = 'Export Report';
+                }, 2000);
+            }, 1000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            generateMovementBars();
+            
+            // Setup navigation
+            const navPills = document.querySelectorAll('.nav-pill');
+            navPills.forEach(pill => {
+                pill.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update active state
+                    navPills.forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Smooth scroll to section
+                    const targetId = this.getAttribute('href');
+                    if (targetId && targetId !== '#') {
+                        const targetSection = document.querySelector(targetId);
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
