@@ -384,142 +384,52 @@
             font-size: 12px;
         }
 
-        /* 3D Terrain Visualization - Peak in center */
-        .terrain-container {
+        /* 3D Terrain Container */
+        .terrain-canvas-wrapper {
             position: relative;
+            width: 100%;
             height: 400px;
-            background: rgba(0, 0, 0, 0.3);
             border-radius: 12px;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
         }
 
-        .terrain-3d {
-            width: 300px;
-            height: 300px;
-            position: relative;
-            transform-style: preserve-3d;
-            transform: rotateX(60deg) rotateZ(0deg);
-            animation: rotate 30s infinite linear;
-        }
-
-        @keyframes rotate {
-            from { transform: rotateX(60deg) rotateZ(0deg); }
-            to { transform: rotateX(60deg) rotateZ(360deg); }
-        }
-
-        /* Topographic rings - peak in center */
-        .terrain-layer {
-            position: absolute;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 50%;
-            left: 50%;
-            top: 50%;
-            transform-origin: center;
-        }
-
-        .terrain-layer:nth-child(1) { 
-            width: 280px;
-            height: 280px;
-            transform: translate(-50%, -50%) translateZ(10px);
-            border-color: rgba(59, 130, 246, 0.15);
-        }
-        .terrain-layer:nth-child(2) { 
-            width: 220px;
-            height: 220px;
-            transform: translate(-50%, -50%) translateZ(25px);
-            border-color: rgba(59, 130, 246, 0.2);
-        }
-        .terrain-layer:nth-child(3) { 
-            width: 160px;
-            height: 160px;
-            transform: translate(-50%, -50%) translateZ(40px);
-            border-color: rgba(59, 130, 246, 0.25);
-        }
-        .terrain-layer:nth-child(4) { 
-            width: 100px;
-            height: 100px;
-            transform: translate(-50%, -50%) translateZ(55px);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-        .terrain-layer:nth-child(5) { 
-            width: 40px;
-            height: 40px;
-            transform: translate(-50%, -50%) translateZ(70px);
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent);
-            border-color: rgba(59, 130, 246, 0.35);
-        }
-
-        /* Route line */
-        .route-line {
-            position: absolute;
+        #terrain-canvas {
             width: 100%;
             height: 100%;
-            transform: translateZ(75px);
+            display: block;
+            cursor: grab;
         }
 
-        .route-path {
-            stroke: rgba(255, 255, 255, 0.4);
-            stroke-width: 2;
-            fill: none;
-            stroke-dasharray: 5, 5;
-            animation: dash 20s linear infinite;
+        #terrain-canvas:active {
+            cursor: grabbing;
         }
 
-        @keyframes dash {
-            to {
-                stroke-dashoffset: -100;
-            }
-        }
-
-        /* Route points with better labels */
-        .route-point {
-            position: absolute;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+        .terrain-controls {
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-            transform: translateZ(80px);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .terrain-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s;
-            border: 2px solid rgba(0, 0, 0, 0.5);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            color: white;
         }
 
-        .route-point:hover {
-            transform: translateZ(90px) scale(1.2);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        .terrain-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
         }
 
-        .point-start {
-            background: var(--accent-green);
-            bottom: 10%;
-            left: 15%;
-        }
-
-        .point-technical {
-            background: var(--accent-yellow);
-            bottom: 35%;
-            right: 20%;
-        }
-
-        .point-incident {
-            background: var(--accent-red);
-            top: 30%;
-            right: 35%;
-        }
-
-        .point-summit {
+        .terrain-btn.active {
             background: var(--accent-blue);
-            top: 42%;
-            left: 47%;
+            border-color: var(--accent-blue);
         }
 
         /* Movement Events */
@@ -737,6 +647,23 @@
             font-weight: 500;
         }
 
+        /* 3D Text Labels */
+        .waypoint-label {
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
         /* Waypoint legend */
         .waypoint-legend {
             display: grid;
@@ -756,15 +683,10 @@
         }
 
         .legend-dot {
-            width: 24px;
-            height: 24px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-            color: white;
+            flex-shrink: 0;
         }
 
         /* Section markers for navigation */
@@ -897,47 +819,33 @@
                     <div class="card-header">
                         <div>
                             <h2 class="card-title">Trail Progress</h2>
-                            <p class="card-subtitle">3D elevation map</p>
+                            <p class="card-subtitle">3D terrain visualization</p>
                         </div>
                     </div>
-                    <div class="terrain-container">
-                        <div class="terrain-3d">
-                            <!-- Topographic rings - peak in center -->
-                            <div class="terrain-layer"></div>
-                            <div class="terrain-layer"></div>
-                            <div class="terrain-layer"></div>
-                            <div class="terrain-layer"></div>
-                            <div class="terrain-layer"></div>
-                            
-                            <!-- Route line connecting waypoints -->
-                            <svg class="route-line" viewBox="0 0 300 300">
-                                <path class="route-path" d="M 45 255 L 225 210 L 195 105 L 144 135"/>
-                            </svg>
-                            
-                            <!-- Route waypoints -->
-                            <div class="route-point point-start">START</div>
-                            <div class="route-point point-technical">TECH</div>
-                            <div class="route-point point-incident">EVENT</div>
-                            <div class="route-point point-summit">PEAK</div>
-                        </div>
+                    <div class="terrain-canvas-wrapper">
+                        <canvas id="terrain-canvas"></canvas>
+                    </div>
+                    <div class="terrain-controls">
+                        <button class="terrain-btn" id="rotate-btn" onclick="toggleRotation()">▶ Auto-Rotate</button>
+                        <button class="terrain-btn" onclick="resetCamera()">⟲ Reset View</button>
                     </div>
                     <!-- Waypoint Legend -->
                     <div class="waypoint-legend">
                         <div class="legend-item">
-                            <div class="legend-dot" style="background: #10b981;">START</div>
-                            <span>Trailhead - 6:45 AM</span>
+                            <div class="legend-dot" style="background: #10b981;"></div>
+                            <span>START - Trailhead (6:45 AM)</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-dot" style="background: #f59e0b;">TECH</div>
-                            <span>Technical Terrain - 8:15 AM</span>
+                            <div class="legend-dot" style="background: #f59e0b;"></div>
+                            <span>TECH - Technical Terrain (8:15 AM)</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-dot" style="background: #ef4444;">EVENT</div>
-                            <span>Movement Issue - 9:45 AM</span>
+                            <div class="legend-dot" style="background: #ef4444;"></div>
+                            <span>EVENT - Movement Issue (9:45 AM)</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-dot" style="background: #3b82f6;">PEAK</div>
-                            <span>Summit Reached - 10:00 AM</span>
+                            <div class="legend-dot" style="background: #3b82f6;"></div>
+                            <span>PEAK - Summit (10:00 AM)</span>
                         </div>
                     </div>
                 </div>
@@ -1080,16 +988,293 @@
 
     <div class="tooltip" id="tooltip"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
     <script>
+        // Three.js 3D Terrain Setup
+        let scene, camera, renderer, labelRenderer, terrain, trailLine, waypoints = [];
+        let controls = { isDragging: false, previousMousePosition: { x: 0, y: 0 } };
+        let rotation = { x: -0.35, y: 0.5 };
+        let autoRotate = false;
+        let animationId;
+
+        function initTerrain() {
+            const canvas = document.getElementById('terrain-canvas');
+            const wrapper = canvas.parentElement;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0a);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(0, 25, 35);
+            camera.lookAt(0, 0, 0);
+
+            // WebGL Renderer
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            // CSS2D Label Renderer
+            labelRenderer = new THREE.CSS2DRenderer();
+            labelRenderer.setSize(width, height);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0';
+            labelRenderer.domElement.style.left = '0';
+            labelRenderer.domElement.style.pointerEvents = 'none';
+            wrapper.appendChild(labelRenderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            scene.add(directionalLight);
+
+            // Create terrain
+            createTerrain();
+
+            // Create trail path and get points
+            const trailPoints = createTrail();
+
+            // Create waypoint markers on the trail
+            createWaypoints(trailPoints);
+
+            // Mouse controls
+            setupControls();
+
+            // Start animation
+            animate();
+        }
+
+        function createTerrain() {
+            const size = 40;
+            const segments = 80;
+            const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
+            
+            // Generate mountain-like terrain
+            const vertices = geometry.attributes.position.array;
+            for (let i = 0; i < vertices.length; i += 3) {
+                const x = vertices[i];
+                const y = vertices[i + 1];
+                
+                // Create a central peak with some variation
+                const distanceFromCenter = Math.sqrt(x * x + y * y);
+                const baseHeight = Math.max(0, 8 - distanceFromCenter * 0.4);
+                
+                // Add some noise for realistic terrain
+                const noise = (Math.sin(x * 0.5) + Math.cos(y * 0.5)) * 0.8;
+                const detailNoise = (Math.sin(x * 2) + Math.cos(y * 2)) * 0.3;
+                
+                vertices[i + 2] = baseHeight + noise + detailNoise;
+            }
+            
+            geometry.computeVertexNormals();
+
+            // Material with gradient-like coloring
+            const material = new THREE.MeshStandardMaterial({
+                color: 0x2a2a2a,
+                flatShading: true,
+                roughness: 0.9,
+                metalness: 0.1
+            });
+
+            terrain = new THREE.Mesh(geometry, material);
+            terrain.rotation.x = -Math.PI / 2;
+            scene.add(terrain);
+        }
+
+        function getTerrainHeight(x, y) {
+            // Calculate height at position (matching terrain generation logic)
+            const distanceFromCenter = Math.sqrt(x * x + y * y);
+            const baseHeight = Math.max(0, 8 - distanceFromCenter * 0.4);
+            const noise = (Math.sin(x * 0.5) + Math.cos(y * 0.5)) * 0.8;
+            const detailNoise = (Math.sin(x * 2) + Math.cos(y * 2)) * 0.3;
+            return baseHeight + noise + detailNoise + 0.3; // +0.3 to keep trail above surface
+        }
+
+        function createTrail() {
+            // Define trail path that winds up the mountain
+            const trailPoints = [];
+            
+            // Spiral path going up and around - start from the edge
+            const steps = 60;
+            for (let i = 0; i < steps; i++) {
+                const t = i / steps;
+                const angle = t * Math.PI * 2.5; // 2.5 rotations
+                const radius = 15 - t * 14; // Spiral inward from radius 15 to 1
+                
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                const height = getTerrainHeight(x, y);
+                
+                trailPoints.push(new THREE.Vector3(x, height, y));
+                
+                // Log first few points to help with positioning
+                if (i < 5) {
+                    console.log(`Trail point ${i}: x=${x.toFixed(2)}, y=${y.toFixed(2)}, height=${height.toFixed(2)}`);
+                }
+            }
+            
+            // Create the trail line
+            const trailGeometry = new THREE.BufferGeometry().setFromPoints(trailPoints);
+            const trailMaterial = new THREE.LineBasicMaterial({ 
+                color: 0xdddddd, 
+                linewidth: 3,
+                opacity: 0.9,
+                transparent: true
+            });
+            
+            trailLine = new THREE.Line(trailGeometry, trailMaterial);
+            scene.add(trailLine);
+
+            // Return trail points for waypoint positioning
+            return trailPoints;
+        }
+
+        function createWaypoints(trailPoints) {
+            const waypointData = [
+                { name: 'START', color: 0x10b981, cssColor: '#10b981', index: 0 }, // First point
+                { name: 'TECH', color: 0xf59e0b, cssColor: '#f59e0b', index: Math.floor(trailPoints.length * 0.25) }, // 25% along trail
+                { name: 'EVENT', color: 0xef4444, cssColor: '#ef4444', index: Math.floor(trailPoints.length * 0.65) }, // 65% along trail
+                { name: 'PEAK', color: 0x3b82f6, cssColor: '#3b82f6', index: trailPoints.length - 1 } // End point
+            ];
+
+            waypointData.forEach(data => {
+                const trailPoint = trailPoints[data.index];
+                const x = trailPoint.x;
+                const y = trailPoint.z; // Note: trail uses z for y-coordinate
+                const height = trailPoint.y;
+                
+                // Create sphere marker
+                const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+                const material = new THREE.MeshStandardMaterial({ 
+                    color: data.color,
+                    emissive: data.color,
+                    emissiveIntensity: 0.3,
+                    roughness: 0.5,
+                    metalness: 0.5
+                });
+                
+                const marker = new THREE.Mesh(geometry, material);
+                marker.position.set(x, height + 0.5, y);
+                scene.add(marker);
+                
+                // Add a cylinder as a "pin"
+                const pinGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 8);
+                const pinMaterial = new THREE.MeshStandardMaterial({ color: data.color });
+                const pin = new THREE.Mesh(pinGeometry, pinMaterial);
+                pin.position.set(x, height, y);
+                scene.add(pin);
+
+                // Create text label with matching color
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'waypoint-label';
+                labelDiv.textContent = data.name;
+                labelDiv.style.color = data.cssColor;
+                labelDiv.style.borderColor = data.cssColor;
+                labelDiv.style.backgroundColor = data.cssColor + '22'; // Add alpha for subtle tint
+                const label = new THREE.CSS2DObject(labelDiv);
+                label.position.set(x, height + 1.5, y);
+                scene.add(label);
+                
+                waypoints.push(marker);
+            });
+        }
+
+        function setupControls() {
+            const canvas = document.getElementById('terrain-canvas');
+
+            canvas.addEventListener('mousedown', (e) => {
+                controls.isDragging = true;
+                controls.previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (controls.isDragging) {
+                    const deltaX = e.clientX - controls.previousMousePosition.x;
+                    const deltaY = e.clientY - controls.previousMousePosition.y;
+
+                    rotation.y += deltaX * 0.005;
+                    rotation.x += deltaY * 0.005;
+
+                    // Limit vertical rotation
+                    rotation.x = Math.max(-Math.PI / 2, Math.min(0, rotation.x));
+
+                    controls.previousMousePosition = { x: e.clientX, y: e.clientY };
+                }
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                controls.isDragging = false;
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                controls.isDragging = false;
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+                labelRenderer.setSize(width, height);
+            });
+        }
+
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+
+            // Auto-rotation
+            if (autoRotate) {
+                rotation.y += 0.003;
+            }
+
+            // Update camera position based on rotation
+            const radius = 35;
+            camera.position.x = radius * Math.sin(rotation.y) * Math.cos(rotation.x);
+            camera.position.y = radius * Math.sin(rotation.x) + 25;
+            camera.position.z = radius * Math.cos(rotation.y) * Math.cos(rotation.x);
+            camera.lookAt(0, 3, 0);
+
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+
+        function toggleRotation() {
+            autoRotate = !autoRotate;
+            const btn = document.getElementById('rotate-btn');
+            if (autoRotate) {
+                btn.classList.add('active');
+                btn.textContent = '⏸ Pause';
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '▶ Auto-Rotate';
+            }
+        }
+
+        function resetCamera() {
+            rotation = { x: -0.35, y: 0.5 };
+            autoRotate = false;
+            const btn = document.getElementById('rotate-btn');
+            btn.classList.remove('active');
+            btn.textContent = '▶ Auto-Rotate';
+        }
+
         // Generate movement quality data
         function generateMovementBars() {
             const container = document.getElementById('movementBars');
-            const hours = 4; // 7 AM to 10 AM
             const data = [
-                { quality: 85, freeze: false }, // 7 AM - good start
-                { quality: 72, freeze: true },  // 8 AM - stream crossing issue
-                { quality: 68, freeze: true },  // 9 AM - rocky section
-                { quality: 75, freeze: false }  // 10 AM - recovery
+                { quality: 85, freeze: false },
+                { quality: 72, freeze: true },
+                { quality: 68, freeze: true },
+                { quality: 75, freeze: false }
             ];
 
             container.innerHTML = '';
@@ -1161,7 +1346,6 @@
         }
 
         function exportReport() {
-            // Simulate export
             const btn = document.querySelector('.btn-export');
             btn.textContent = 'Exporting...';
             
@@ -1176,18 +1360,16 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             generateMovementBars();
+            initTerrain();
             
             // Setup navigation
             const navPills = document.querySelectorAll('.nav-pill');
             navPills.forEach(pill => {
                 pill.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
-                    // Update active state
                     navPills.forEach(p => p.classList.remove('active'));
                     this.classList.add('active');
                     
-                    // Smooth scroll to section
                     const targetId = this.getAttribute('href');
                     if (targetId && targetId !== '#') {
                         const targetSection = document.querySelector(targetId);
