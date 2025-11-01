@@ -826,7 +826,7 @@
                         <canvas id="terrain-canvas"></canvas>
                     </div>
                     <div class="terrain-controls">
-                        <button class="terrain-btn" id="rotate-btn" onclick="toggleRotation()">▶ Auto-Rotate</button>
+                        <button class="terrain-btn active" id="rotate-btn" onclick="toggleRotation()">⏸ Pause</button>
                         <button class="terrain-btn" onclick="resetCamera()">⟲ Reset View</button>
                     </div>
                     <!-- Waypoint Legend -->
@@ -995,7 +995,7 @@
         let scene, camera, renderer, labelRenderer, terrain, trailLine, waypoints = [];
         let controls = { isDragging: false, previousMousePosition: { x: 0, y: 0 } };
         let rotation = { x: -0.35, y: 0.5 };
-        let autoRotate = false;
+        let autoRotate = true;
         let animationId;
 
         function initTerrain() {
@@ -1113,11 +1113,6 @@
                 const height = getTerrainHeight(x, y);
                 
                 trailPoints.push(new THREE.Vector3(x, height, y));
-                
-                // Log first few points to help with positioning
-                if (i < 5) {
-                    console.log(`Trail point ${i}: x=${x.toFixed(2)}, y=${y.toFixed(2)}, height=${height.toFixed(2)}`);
-                }
             }
             
             // Create the trail line
